@@ -1,0 +1,106 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<style>
+        #comment-section {
+      width: 500px;
+      /* margin: auto; */
+      padding: 10px;
+      border: 1px solid #ccc;
+      height: 200px; /* Set a fixed height */
+      overflow-y: auto; /* Enable vertical scrolling */
+    }
+
+    .comment {
+      border-bottom: 1px solid #eee;
+      padding: 8px;
+    }
+
+</style>
+
+    {% if not listing.active %}
+
+        {% if user == listing.user %}
+            <div class="alert alert-success" role="alert">
+                This listing has been sold!
+            </div>
+        {%elif user == highest_bidder%}
+            <div class="alert alert-success" role="alert">
+                You won this listing!
+            </div>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                This listing has been sold!
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+
+
+<div class="card mb-3" style="max-width: max-content">
+    <div class="row no-gutters">
+        <div class="col-md-4">
+            <img src="{{ listing.image }}" class="card-img" alt="...">
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">{{ listing.title }} - {{ listing.starting_bid}}</h5>
+                <p class="card-text">{{ listing.category }}</p>
+                <p class="card-text">{{ listing.description }}</p>
+
+                <h6>Comments</h6>
+                <form action="{% url 'comment' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="text" id="comment-input" name="comm" placeholder="Enter your comment...">
+                    <button id="add-comment-btn">Add Comment</button>
+                </form>
+
+                <div id="comment-section">
+                    {% for comment in comments %}
+                        <div class="comment">
+                            <h5>{{ comment.user.username }}</h5>
+                            <p>{{ comment.comment }}</p>
+                        </div>
+                    {% empty %}
+                        <p>Currently, there are no comments.</p>
+                    {% endfor %}
+                </div>
+                    
+                {% if user == listing.user %}
+                    <form action="{% url 'close' listing.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="close">Sell Listing</button>
+                    </form>
+                {% else %}
+                    <h6 style="margin-top:20px">Place Bid</h6>
+                    {% if highest_bid == listing.starting_bid %}
+                        <p style="color:green">No current bids. Bid must be greater than or equal to starting price: {{ highest_bid }}</p>
+                    {% else %}
+                        <p style="color:green">Current highest bid: {{ highest_bid }}</p>
+                    {% endif %}
+
+                    {% if message %}
+                        <p style="color:red">{{ message }}</p>
+                    {% endif %}
+                    <form method="post" action="{% url 'bid' listing.id %}">
+                        {% csrf_token %}
+                        <input type="text" id="biddy" name="biddy" placeholder="Place Bid">
+                        <button type="submit" name="submitBid">Bid</button>
+                    </form>
+                {% endif %}
+
+                <form action="{% url 'watchlist' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" value="{{listing.id}}" name="watchlister">Add to Watchlist</button>
+                </form>
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

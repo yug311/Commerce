@@ -1,0 +1,46 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    {% if category is None%}
+        <h2>Active Listings</h2>
+    {% elif category == "Watchlist" %}
+        <h2>Watchlist</h2>
+    {% else %}
+        <h2>{{ category }}</h2>
+        <form action="{% url 'categories' %}" method="get">
+            <select class="form-control" name="category" required>
+                <option value="" selected disabled hidden>Category</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Toys">Toys</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Home">Home</option>
+                <option value="Other">Other</option>
+            </select>
+            <button type="submit" name="submitOption">Select</button>
+        </form>
+    {% endif %}
+
+    {% for listing in listings %}
+
+        <div class="card mb-3" style="max-width: 400px">
+            <div class="row no-gutters">
+                <div class="col-md-4">
+                    <img src="{{ listing.image }}" class="card-img" alt="...">
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card-body">
+                    <h5 class="card-title">{{ listing.title }} - {{ listing.starting_bid}}</h5>
+                    <p class="card-text">{{ listing.category }}</p>
+                    <p class="card-text">{{ listing.description }}</p>
+                    <a href="{% url 'enlarged' listing.id %}" class="btn btn-primary">View Listing</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+    {% empty %}
+        <p>Currently, there are no active listings.</p>
+    {% endfor %}
+{% endblock %}
